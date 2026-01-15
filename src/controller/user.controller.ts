@@ -1,8 +1,8 @@
 import {validationResult} from "express-validator";
 import { Request,Response } from "express";
-import { UserfindByEmail,createUser, generateAuthToken, hashedPassword } from "../Services/user.service.js";
-import UserModel from "../models/user.model.js";
+import { UserfindByEmail,comparePassword,createUser, generateAuthToken, hashedPassword } from "../Services/user.service.js";
 import { RegisterDto } from "../DTO/user.dto.js";
+import Env from "../Config/envConfig.js";
 
 export const registerUser = async(req:Request,res:Response)=>{
     const erros = validationResult(req);
@@ -31,4 +31,30 @@ export const registerUser = async(req:Request,res:Response)=>{
         token : token,
         user : user
     })
+}
+
+export const loginUser = async function(req:Request,res:Response){
+    const error = validationResult(req);
+    if(!error.isEmpty()){
+        return res.status(400).json({error:error.array()});
+    }
+    const {email,password} = req.body;
+    if(!email || !password){
+        return res.status(400).json({message:"email and password must be provided"});
+    }
+    const user = await UserfindByEmail(email);
+    if(!user){
+        return res.status(404).json({message:"user with this email is not found"});
+    }
+    const isPasswordTrue = comparePassword(password,user?.password);
+    if(!isPasswordTrue){
+        res.status(401).json({message:"Incorrect password"});
+    }
+    const token = generateAuthToken(user._id)
+    res.cookie("jwt",token,{
+        maxAge : 24*60*60*1000,
+        secure : true,
+        httpOnly : Env.nodeEnv === "development" ? true : false
+    });
+    return res.status(200).json({message:"User login successfully",token:token})
 }
