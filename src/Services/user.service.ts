@@ -26,7 +26,7 @@ export const UserfindByEmail = async (email:string)=>{
     if(!email){
         throw new Error("Id must be provided");
     }
-    const user = await UserModel.findById(email);
+    const user = await UserModel.findOne({email:email});
     return user;
 }
 
