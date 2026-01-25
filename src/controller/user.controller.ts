@@ -4,6 +4,10 @@ import { UserfindByEmail,comparePassword,createUser, generateAuthToken, hashedPa
 import { RegisterDto } from "../DTO/user.dto.js";
 import Env from "../Config/envConfig.js";
 
+export interface IRequest extends Request{
+    user ?: any
+}
+
 export const registerUser = async(req:Request,res:Response)=>{
     const erros = validationResult(req);
     if(!erros.isEmpty()){
@@ -57,4 +61,23 @@ export const loginUser = async function(req:Request,res:Response){
         httpOnly : Env.nodeEnv === "development" ? true : false
     });
     return res.status(200).json({message:"User login successfully",token:token})
+}
+
+export const profile = (req:IRequest,res:Response)=>{
+    if(!req.user){
+        return res.status(401).json({
+            message:"unauthorized user"
+        });
+    }
+    return res.status(200).json({
+        message:"profile fetched successfully",
+        data : req?.user
+    })
+}
+
+export const logoutUser = (req:IRequest,res:Response)=>{
+    res.clearCookie("jwt");
+    return res.status(200).json({
+        message:"User logged out successfully"
+    });
 }
