@@ -18,7 +18,7 @@ export const UserfindById = async (_id:string)=>{
     if(!_id){
         throw new Error("Id must be provided");
     }
-    const user = await UserModel.findById(_id);
+    const user = await UserModel.findById(_id).select("-password");
     return user;
 }
 
