@@ -56,8 +56,9 @@ class MapServiceClass {
         throw new Error("Unable to fetch Auto Suggestion");
       }
       return response.data?.predictions.map((place:any) => place.description);
-    } catch (error) {
-      
+    } catch (error:any) {
+      console.error("Error at Auto Suggestion:", error.message);
+      throw new Error(`Unable to fetch Auto Suggestion: ${error.message}`);
     }
   }
 }
